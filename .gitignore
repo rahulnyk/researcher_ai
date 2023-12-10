@@ -1,0 +1,9 @@
+.env
+.DS_Store
+.python-version
+law_database.ipynb
+playground
+*/__pycache__
+__pycache__/
+.venv
+experiments*
