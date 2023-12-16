@@ -1,7 +1,7 @@
 ## Define Agent
 ##
 from .agent_run_model import AgentRunModel, Question
-
+from yachalk import chalk
 ## Actions
 from .actions import select_next_question
 from .actions import ask_new_questions
@@ -29,20 +29,22 @@ class Agent:
         return documents
 
     def run(self):
+        print(chalk.green.bold("Goal: ", self.run_model.goal()))
+        self.run_model.set_running()
         # Step 1: create a hypothesis and find initial Answer
         hyde_res = create_initial_hypothesis(self.run_model, self.agent_settings)
         hypothesis = f"{self.run_model.goal()}\n{hyde_res}"
         docs = self.get_docs(hypothesis)
 
         ## Step 2: Find Initial answer
-        print("\n\nInitial Answer ▷▶")
-        self.run_model.set_current_question(self.run_model.goal_question_id)
+        print("\n\nInitial Answer:")
+        self.run_model.set_current_question(self.run_model.get_goal_question_id())
         answer = answer_current_question(self.run_model, self.agent_settings, docs)
         self.run_model.add_answer_to_answerpad(answer)
-        parent_node_id = self.run_model.goal_question_id
+        parent_node_id = self.run_model.get_goal_question_id()
 
         for current_iteration in range(1, self.max_iter + 1):
-            print(f"\n\nIteration - {current_iteration}  ▷▶  \n")
+            self.run_model.set_current_depth(current_iteration)
 
             ## Step 3: Generate questions
             questions = ask_new_questions(
@@ -67,3 +69,4 @@ class Agent:
             )
 
         print("\n\nFinal Answer ▷▶\n", self.run_model.find_question(0).answer)
+        self.run_model.set_finished()

@@ -13,34 +13,45 @@ class Question(BaseModel):
 
 
 class AgentRunModel:
+    uuid: str
+    _goal_question_id = 0
     _questions: List[Question]
     _answerpad: List[str]
-    uuid: str
-    status: Literal["init", "running", "finished"]
-    goal_question_id = 0
+    _status: Literal["init", "running", "finished"]
+    _current_depth = 0
 
     def __init__(self):
         self._questions = []
         self._answerpad = []
+        self._status = "init"
+        self._current_depth = 0
         self.uuid = str(uuid4())
-        self.status = "init"
+
+    def get_goal_question_id(self):
+        return self._goal_question_id
+    
+    def set_current_depth(self, depth: int):
+        self._current_depth = depth
+
+    def get_current_depth(self) -> int:
+        return self._current_depth
 
     def find_question(self, id: int) -> Question | None:
         qs = [q for q in self._questions if q.id == id]
         return None if len(qs) == 0 else qs[0]
 
     def set_goal(self, goal: str) -> Question:
-        self.add_question({"id": self.goal_question_id, "question": goal})
+        self.add_question({"id": self._goal_question_id, "question": goal})
 
     def goal(self) -> str:
         q = self.find_question(0).question
         return q if q else None
 
     def set_running(self):
-        self.status = "running"
+        self._status = "running"
 
     def set_finished(self):
-        self.status = "finished"
+        self._status = "finished"
 
     def set_current_question(self, question_id: int):
         q = self.find_question(question_id)
@@ -91,12 +102,21 @@ class AgentRunModel:
     def get_answerpad(self) -> List[str]:
         return self._answerpad
 
-    ## These functions should not be here.
-    # def get_question_string(self, id: int):
-    #     q = self.find_question(id)
-    #     return None if q is None else q.question
+    def create_tree(self, id=None, parent_id=None):
+        id = id if id else self._goal_question_id
+        question = next((q for q in self._questions if q.id == id), None)
+        tree = {
+            "id": id,
+            "edge_name": question.question,
+            "name": question.question,
+            "answer": question.answer,
+            "parent": parent_id,
+        }
+        children_ids = [q.id for q in self._questions if q.parent_id == id]
 
-    # def get_questions_string_list(self):
-    #     q_list = [f"'{q.question}'" for q in self._questions]
-    #     q_string_list = "[\n" + ",\n".join(q_list) + "\n]"
-    #     return q_string_list
+        if len(children_ids) != 0:
+            tree["children"] = []
+            for cid in children_ids:
+                child_tree = self.create_tree(cid, id)
+                tree["children"].append(child_tree)
+        return tree

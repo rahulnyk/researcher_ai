@@ -6,6 +6,7 @@ def questionAtomizer(
     question: str,
     num_questions=2,
     model="mistral-openorca:latest",
+    stream=True
 ):
     SYS_PROMPT = (
         "You are a curious researcher. You will be provided with a goal question. "
@@ -23,6 +24,6 @@ def questionAtomizer(
 
     prompt = f"Goal Question: ``` {question} ```.\n\n Your response:"
 
-    response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt)
+    response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 
     return response

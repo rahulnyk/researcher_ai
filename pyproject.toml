@@ -21,6 +21,7 @@ yachalk = "^0.1.5"
 uuid = "^1.30"
 pydantic = "^2.5.2"
 seaborn = "^0.13.0"
+loguru = "^0.7.2"
 
 
 [build-system]

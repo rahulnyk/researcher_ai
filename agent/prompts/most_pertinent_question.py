@@ -6,6 +6,7 @@ def mostPertinentQuestion(
     question: str,
     unanswered_questions: str,
     model="mistral-openorca:latest",
+    stream=True
 ):
     SYS_PROMPT = (
         "You are a curious researcher. Your task is to choose one question "
@@ -24,6 +25,6 @@ def mostPertinentQuestion(
         "Your response:"
     )
 
-    response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt)
+    response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 
     return response

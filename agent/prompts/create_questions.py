@@ -7,6 +7,7 @@ def createQuestions(
     previous_questions: str,
     num_questions=2,
     model="mistral-openorca:latest",
+    stream=True
 ):
     SYS_PROMPT = (
         "Your are a curious researcher. Your task is to ask questions that can help you answer the goal question. "
@@ -17,7 +18,7 @@ def createQuestions(
         "Thought 3: Think about if these questions are relevant to your goal question. Discard the questions that are not relevant.\n"
         "Thought 4: Discard the questions that are semantically similar to the 'previously asked questions'.\n"
         f"Respond with at most {num_questions} questions. "
-        "Format your response as a python list of questions like:\n "
+        "Format your response as an array of strings. Example: \n "
         " ['First Question', 'Second Question', ...]"
     )
 
@@ -28,6 +29,6 @@ def createQuestions(
         "Your response:"
     )
 
-    response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt)
+    response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 
     return response

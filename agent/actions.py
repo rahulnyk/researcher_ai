@@ -11,7 +11,7 @@ from yachalk import chalk
 
 
 def select_next_question(run_model: AgentRunModel, agent_settings) -> Question:
-    print(chalk.bold.green("\n\nNext Question I must ask ▷▶\n"))
+    print(chalk.bold.green(f"\n\n╰─➤ [{run_model.get_current_depth()}] Next Question I must ask ▷▶\n"))
     unanswered_questions = run_model.get_unanswered_questions()
     q_list = [f"{q.id}. '{q.question}'" for q in unanswered_questions]
     q_string_list = "[\n" + ",\n".join(q_list) + "\n]"
@@ -35,7 +35,7 @@ def select_next_question(run_model: AgentRunModel, agent_settings) -> Question:
 
 
 def ask_new_questions(run_model: AgentRunModel, agent_settings, parent_node_id):
-    print(chalk.bold.green("\nAsk more questions based on new context ▷▶\n"))
+    print(chalk.bold.green(f"\n[{run_model.get_current_depth()}]\n╰─➤ Ask more questions based on new context ▷▶\n"))
     start_id = run_model.get_last_id() + 1
     q_list = [f"'{q.question}'" for q in run_model.get_all_questions()]
     previous_questions = "[\n" + ",\n".join(q_list) + "\n]"
@@ -62,7 +62,7 @@ def ask_new_questions(run_model: AgentRunModel, agent_settings, parent_node_id):
 
 
 def answer_current_question(run_model: AgentRunModel, agent_settings, docs):
-    print(chalk.bold.green("\n\nAnswer ▷▶\n"))
+    print(chalk.bold.green(f"\n[{run_model.get_current_depth()}]\n╰─➤ Answer ▷▶\n"))
     current_question = run_model.get_current_question()
     docs_string = "\n----\n".join(
         [f"Excerpt:\n {doc.page_content}\n- Source: {doc.metadata}" for doc in docs]
@@ -78,8 +78,8 @@ def answer_current_question(run_model: AgentRunModel, agent_settings, docs):
 
 
 def refine_goal_answer(run_model: AgentRunModel, agent_settings, new_context: str):
-    print(chalk.bold.green("\n\nRefining the existing answer ▷▶\n"))
-    goal_question_id = run_model.goal_question_id
+    print(chalk.bold.green(f"\n[{run_model.get_current_depth()}]\n╰─➤ Refining the existing answer ▷▶\n"))
+    goal_question_id = run_model.get_goal_question_id()
     refine_answer_res = refineAnswer(
         question=run_model.goal(),
         answer=run_model.find_question(goal_question_id).answer,
@@ -91,7 +91,7 @@ def refine_goal_answer(run_model: AgentRunModel, agent_settings, new_context: st
 
 
 def create_initial_hypothesis(run_model: AgentRunModel, agent_settings):
-    print(chalk.bold.green("\n\nInitial Hypothesis ▷▶\n"))
+    print(chalk.bold.green(f"\n╰─➤ Initial Hypothesis ▷▶\n"))
     hyde_res = hyDE(
         run_model.goal(), 
         model=agent_settings.get("model", "mistral-openorca:latest")

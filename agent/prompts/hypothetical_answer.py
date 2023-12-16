@@ -5,6 +5,7 @@ from ..ollama import client
 def hyDE(
     question: str,
     model="mistral-openorca:latest",
+    stream=True
 ):
     SYS_PROMPT = (
         "You will be provided with a 'question'."
@@ -22,6 +23,6 @@ def hyDE(
 
     prompt = f"Question: ``` {question} ```\n Your response:"
 
-    response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt)
+    response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 
     return response
