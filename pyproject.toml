@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "research-agent"
+name = "researcher-ai"
 version = "0.1.0"
 description = ""
 authors = ["Nayak <rahul.nyk@gmail.com>"]
@@ -22,6 +22,7 @@ uuid = "^1.30"
 pydantic = "^2.5.2"
 seaborn = "^0.13.0"
 loguru = "^0.7.2"
+neo4j = "^5.15.0"
 
 
 [build-system]
