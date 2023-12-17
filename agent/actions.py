@@ -3,6 +3,7 @@ from .prompts.create_questions import createQuestions
 from .prompts.retrieval_qa import retrievalQA
 from .prompts.refine_answer import refineAnswer
 from .prompts.hypothetical_answer import hyDE
+from .prompts.compile_answer import compileAnswer
 from .helpers.response_helpers import question_str_to_dict
 from .helpers.response_helpers import result_to_questions_list
 from .agent_run_model import AgentRunModel, Question
@@ -65,10 +66,10 @@ def answer_current_question(run_model: AgentRunModel, agent_settings, docs):
     print(chalk.bold.green(f"\n[{run_model.get_current_depth()}]\n╰─➤ Answer ▷▶\n"))
     current_question = run_model.get_current_question()
     docs_string = "\n----\n".join(
-        [f"\Text: {doc.page_content}\Source Metadata: {doc.metadata}\n" for doc in docs]
+        [f"\nSource Text: {doc.page_content}\nSource Metadata: {doc.metadata}\n" for doc in docs]
     )
     print(chalk.gray([d.metadata for d in docs]))
-    print(chalk.gray(docs_string[:100]))
+    print(chalk.gray(docs_string[:250]))
     print(chalk.gray(current_question.question))
     intermediate_q_answer = retrievalQA(
         current_question.question,
@@ -101,3 +102,20 @@ def create_initial_hypothesis(run_model: AgentRunModel, agent_settings):
     )
     run_model.add_answer_to_answerpad(hyde_res)
     return hyde_res
+
+
+def compile_answer(run_model: AgentRunModel, agent_settings):
+    print(
+        chalk.bold.green(
+            f"\n[{run_model.get_current_depth()}]\n╰─➤ Compiling the final Answer ▷▶\n"
+        )
+    )
+    notes = "\n...".join([q.answer for q in run_model.get_answered_questions()])
+    answer_res = compileAnswer(
+        question=run_model.goal(),
+        context=notes,
+        model=agent_settings.get("model", "mistral-openorca:latest"),
+    )
+    run_model.add_answer_to_answerpad(answer_res)
+    goal_question_id = run_model.get_goal_question_id()
+    run_model.add_answer_to_question(goal_question_id, answer_res)

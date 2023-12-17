@@ -31,7 +31,7 @@ class Agent:
     def run(self):
         print(chalk.green.bold("Goal: ", self.run_model.goal()))
         self.run_model.set_running()
-        # Step 1: create a hypothesis and find initial Answer
+        # Step 1: create a hypothesis 
         hyde_res = create_initial_hypothesis(self.run_model, self.agent_settings)
         hypothesis = f"{self.run_model.goal()}\n{hyde_res}"
         docs = self.get_docs(hypothesis)
