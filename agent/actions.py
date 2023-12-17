@@ -65,8 +65,11 @@ def answer_current_question(run_model: AgentRunModel, agent_settings, docs):
     print(chalk.bold.green(f"\n[{run_model.get_current_depth()}]\n╰─➤ Answer ▷▶\n"))
     current_question = run_model.get_current_question()
     docs_string = "\n----\n".join(
-        [f"Excerpt:\n {doc.page_content}\n- Source: {doc.metadata}" for doc in docs]
+        [f"\Text: {doc.page_content}\Source Metadata: {doc.metadata}\n" for doc in docs]
     )
+    print(chalk.gray([d.metadata for d in docs]))
+    print(chalk.gray(docs_string[:100]))
+    print(chalk.gray(current_question.question))
     intermediate_q_answer = retrievalQA(
         current_question.question,
         docs_string,

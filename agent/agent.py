@@ -12,11 +12,11 @@ from .actions import create_initial_hypothesis
 ## Utils
 from langchain_core.documents import Document
 from typing import List
-from .retriever import Retriever
+from .retrievers.base_retriever import BaseRetriever
 
 
 class Agent:
-    def __init__(self, goal: str, retriever: Retriever, agent_settings: dict):
+    def __init__(self, goal: str, retriever: BaseRetriever, agent_settings: dict):
         self.agent_settings = agent_settings
         self.retriever = retriever
         self.run_model = AgentRunModel()
@@ -25,7 +25,7 @@ class Agent:
         self.run_model.set_goal(goal)
 
     def get_docs(self, query: str) -> List[Document]:
-        documents = self.retriever.get_docs(query)
+        documents = self.retriever.get_docs(query, {"k": 5, "fetch_k": 10})
         return documents
 
     def run(self):

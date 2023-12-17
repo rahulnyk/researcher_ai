@@ -1,15 +1,18 @@
 from typing import List, Optional, Literal
 from pydantic import BaseModel, ValidationError
 from uuid import uuid4
+from openai import OpenAI
 
 
 class Question(BaseModel):
     id: int
+    uuid: str | None = None
     parent_id: int | None = None
     question: str
     answer: str | None = None
     documents: List | None = None
     status: Literal["current", "unanswered", "answered"] = "unanswered"
+    embedding: List[int] | None = None
 
 
 class AgentRunModel:
@@ -25,7 +28,11 @@ class AgentRunModel:
         self._answerpad = []
         self._status = "init"
         self._current_depth = 0
-        self.uuid = str(uuid4())
+        self._client = OpenAI()
+        self.uuid = self.generate_uuid()
+
+    def generate_uuid(self):
+        return str(uuid4())
 
     def get_goal_question_id(self):
         return self._goal_question_id
@@ -80,6 +87,8 @@ class AgentRunModel:
     def add_question(self, q_dict: dict):
         try:
             q = Question(**q_dict)
+            q.uuid = self.generate_uuid()
+            self.add_embedding_to_question(q)
             self._questions.append(q)
         except ValidationError as e:
             print(e.errors())
@@ -101,8 +110,16 @@ class AgentRunModel:
 
     def get_answerpad(self) -> List[str]:
         return self._answerpad
+    
+    def add_embedding_to_question(self, question: Question):
+        response = self._client.embeddings.create(
+            input=question.question,
+            model="text-embedding-ada-002"
+        )
+        question.embedding = response.data[0].embedding
 
     def create_tree(self, id=None, parent_id=None):
+        "Creates a tree structure with the questions"
         id = id if id else self._goal_question_id
         question = next((q for q in self._questions if q.id == id), None)
         tree = {
