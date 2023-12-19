@@ -1,12 +1,13 @@
 from ..ollama import client
 # import ollama.client as client
-
+from .prompt_logger import log_prompt
 
 def mostPertinentQuestion(
     question: str,
     unanswered_questions: str,
     model="mistral-openorca:latest",
-    stream=True
+    stream=True,
+    verbose=False,
 ):
     SYS_PROMPT = (
         "You are a curious researcher. Your task is to choose one question "
@@ -24,6 +25,12 @@ def mostPertinentQuestion(
         f"Unanswered Questions:  ``` {unanswered_questions} ```\n\n"
         "Your response:"
     )
+
+    if verbose:
+        log_prompt("\n---\nMost Pertinent Question Prompt\n")
+        log_prompt(f"SYS_PROMPT: {SYS_PROMPT}\n")
+        log_prompt(f"GOAL QUESTION: {question}\n")
+        log_prompt(f"UNANSWERED QUESTIONS: {unanswered_questions}\n---\n")
 
     response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 

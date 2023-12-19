@@ -68,5 +68,5 @@ class Agent:
                 self.run_model, self.agent_settings, new_context=intermediate_q_answer
             )
 
-        print("\n\nFinal Answer ▷▶\n", self.run_model.find_question(0).answer)
+        print("\n\n╰─➤ Final Answer ▷▶\n", self.run_model.find_question(0).answer)
         self.run_model.set_finished()

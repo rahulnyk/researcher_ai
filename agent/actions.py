@@ -8,6 +8,9 @@ from .helpers.response_helpers import question_str_to_dict
 from .helpers.response_helpers import result_to_questions_list
 from .agent_run_model import AgentRunModel, Question
 from yachalk import chalk
+from .agent_logger import AgentLogger
+al = AgentLogger(name="ACTIONS LOG")
+logger = al.getLogger()
 
 
 
@@ -23,13 +26,15 @@ def select_next_question(run_model: AgentRunModel, agent_settings) -> Question:
             pq_res = mostPertinentQuestion(
                 run_model.goal(),
                 q_string_list,
-                model=agent_settings.get("model", "mistral-openorca:latest")
+                model=agent_settings.get("model", "mistral-openorca:latest"),
+                stream=agent_settings.get('stream', True),
+                verbose=agent_settings.get('verbose', False),
             )
             pq = question_str_to_dict(pq_res)
             should_retry = False
         except:
             retry += 1
-            print("\n###\nCould not parse the next questions \nRetrying...\n###\n")
+            logger.error("\n###\nCould not parse the next questions \nRetrying...\n###\n")
 
     next_question = run_model.find_question(pq["id"])
     return next_question
@@ -50,6 +55,8 @@ def ask_new_questions(run_model: AgentRunModel, agent_settings, parent_node_id):
                 previous_questions,
                 agent_settings.get("num_questions_per_iter", 3),
                 model=agent_settings.get("model", "mistral-openorca:latest"),
+                stream=agent_settings.get('stream', True),
+                verbose = agent_settings.get('verbose', False),
             )
             questions = result_to_questions_list(
                 questions_res, start_id, parent_node_id
@@ -57,7 +64,7 @@ def ask_new_questions(run_model: AgentRunModel, agent_settings, parent_node_id):
             should_retry = False
         except:
             retry += 1
-            print("\n###\nCould not parse question list \nRetrying...\n###\n")
+            logger.error("\n###\nCould not parse question list \nRetrying...\n###\n")
 
     return questions
 
@@ -68,13 +75,12 @@ def answer_current_question(run_model: AgentRunModel, agent_settings, docs):
     docs_string = "\n----\n".join(
         [f"\nSource Text: {doc.page_content}\nSource Metadata: {doc.metadata}\n" for doc in docs]
     )
-    print(chalk.gray([d.metadata for d in docs]))
-    print(chalk.gray(docs_string[:250]))
-    print(chalk.gray(current_question.question))
     intermediate_q_answer = retrievalQA(
         current_question.question,
         docs_string,
         model=agent_settings.get("model", "mistral-openorca:latest"),
+        stream=agent_settings.get('stream', True),
+        verbose=agent_settings.get('verbose', False)
     )
     run_model.add_answer_to_question(current_question.id, intermediate_q_answer, docs)
 
@@ -89,6 +95,8 @@ def refine_goal_answer(run_model: AgentRunModel, agent_settings, new_context: st
         answer=run_model.find_question(goal_question_id).answer,
         context=new_context,
         model=agent_settings.get("model", "mistral-openorca:latest"),
+        stream=agent_settings.get('stream', True),
+        verbose = agent_settings.get('verbose', False),
     )
     run_model.add_answer_to_answerpad(refine_answer_res)
     run_model.add_answer_to_question(goal_question_id, refine_answer_res)
@@ -98,7 +106,9 @@ def create_initial_hypothesis(run_model: AgentRunModel, agent_settings):
     print(chalk.bold.green(f"\n╰─➤ Initial Hypothesis ▷▶\n"))
     hyde_res = hyDE(
         run_model.goal(), 
-        model=agent_settings.get("model", "mistral-openorca:latest")
+        model=agent_settings.get("model", "mistral-openorca:latest"),
+        stream=agent_settings.get('stream', True),
+        verbose = agent_settings.get('verbose', False),
     )
     run_model.add_answer_to_answerpad(hyde_res)
     return hyde_res
@@ -115,6 +125,8 @@ def compile_answer(run_model: AgentRunModel, agent_settings):
         question=run_model.goal(),
         context=notes,
         model=agent_settings.get("model", "mistral-openorca:latest"),
+        stream=agent_settings.get('stream', True),
+        verbose = agent_settings.get('verbose', False),
     )
     run_model.add_answer_to_answerpad(answer_res)
     goal_question_id = run_model.get_goal_question_id()

@@ -1,12 +1,13 @@
 from ..ollama import client
 from yachalk import chalk
-
+from .prompt_logger import log_prompt
 
 def compileAnswer(
     question: str,
     context: str,
     model="mistral-openorca:latest",
-    stream=True
+    stream=True,
+    verbose=False
 ):
     SYS_PROMPT = (
         "You will be provided with a question, and some research notes."
@@ -22,7 +23,13 @@ def compileAnswer(
         "Your Answer:"
     )
 
-    print(chalk.gray(prompt))
+    if verbose:
+        log_prompt("\n---\nCompile Answer Prompt:\n")
+        log_prompt(f"SYS_PROMPT: {SYS_PROMPT}\n")
+        log_prompt(
+            f"QUESTIONS: {question} \nDOCS: {context[:500]}\n...\n{context[-500:]} \n---\n "
+        )
+
     response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 
     return response

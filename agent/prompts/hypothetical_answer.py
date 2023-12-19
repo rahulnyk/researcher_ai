@@ -1,11 +1,12 @@
 from ..ollama import client
-
+from .prompt_logger import log_prompt
 
 
 def hyDE(
     question: str,
     model="mistral-openorca:latest",
-    stream=True
+    stream=True,
+    verbose = False,
 ):
     SYS_PROMPT = (
         "You will be provided with a 'question'."
@@ -22,6 +23,11 @@ def hyDE(
     )
 
     prompt = f"Question: ``` {question} ```\n Your response:"
+
+    if verbose:
+        log_prompt("\n---\nHypothesis Prompt\n")
+        log_prompt(f"SYS_PROMPT: {SYS_PROMPT}\n")
+        log_prompt(f"QUESTION: {question}\n---\n")
 
     response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 

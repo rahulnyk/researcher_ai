@@ -1,5 +1,5 @@
 from ..ollama import client
-
+from .prompt_logger import log_prompt
 
 
 def refineAnswer(
@@ -7,7 +7,8 @@ def refineAnswer(
     answer: str,
     context: str,
     model="mistral-openorca:latest",
-    stream=True
+    stream=True,
+    verbose=False,
 ):
     SYS_PROMPT = (
         "You will be provided with a question, an existing answer, and some new context"
@@ -25,6 +26,12 @@ def refineAnswer(
         f"New Context: ``` {context} ```\n"
         "New Answer:"
     )
+
+    if verbose:
+        log_prompt("\n---\nRefine Answer Prompt\n")
+        log_prompt(f"SYS_PROMPT: {SYS_PROMPT}\n")
+        log_prompt(f"QUESTIONS: {question}\nANSWER: {answer}\n")
+        log_prompt(f"CTX: {context[:300]}\n...\n{context[-300:]}\n---\n")
 
     response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 
