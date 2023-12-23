@@ -1,5 +1,5 @@
 from ..ollama import client
-
+from .prompt_logger import prompt_logger
 
 def createQuestions(
     question: str,
@@ -7,7 +7,8 @@ def createQuestions(
     previous_questions: str,
     num_questions=2,
     model="mistral-openorca:latest",
-    stream=True
+    stream=True,
+    verbose=False
 ):
     SYS_PROMPT = (
         "Your are a curious researcher. Your task is to ask questions that can help you answer the goal question. "
@@ -28,6 +29,13 @@ def createQuestions(
         f"Previously Asked Questions:  ``` {previous_questions} ```\n\n"
         "Your response:"
     )
+
+    if verbose:
+        prompt_logger.critical("\n---\nCreate Questions Prompt\n")
+        prompt_logger.critical(f"SYS_PROMPT: {SYS_PROMPT}\n")
+        prompt_logger.critical(f"QUESTION: {question}\n")
+        prompt_logger.critical(f"CTX: {context[:300]}\n...\n{context[-300:]}\n")
+        prompt_logger.critical(f"PREV QUESTIONS: {previous_questions}\n---\n")
 
     response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 

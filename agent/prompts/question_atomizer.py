@@ -1,12 +1,13 @@
 from ..ollama import client
-
+from .prompt_logger import prompt_logger
 
 
 def questionAtomizer(
     question: str,
     num_questions=2,
     model="mistral-openorca:latest",
-    stream=True
+    stream=True,
+    verbose=False,
 ):
     SYS_PROMPT = (
         "You are a curious researcher. You will be provided with a goal question. "
@@ -23,6 +24,11 @@ def questionAtomizer(
     )
 
     prompt = f"Goal Question: ``` {question} ```.\n\n Your response:"
+
+    if verbose:
+        prompt_logger.critical("\n---\nQuestion Atomiser Prompt\n")
+        prompt_logger.critical(f"SYS_PROMPT: {SYS_PROMPT}\n")
+        prompt_logger.critical(f"QUESTIONS: {question}\n")
 
     response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 
