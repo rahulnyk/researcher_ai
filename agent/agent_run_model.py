@@ -84,18 +84,19 @@ class AgentRunModel:
         qs = [q for q in self._questions if q.status == "current"]
         return None if len(qs) == 0 else qs[0]
 
-    def add_question(self, q_dict: dict):
+    def add_question(self, q_dict: dict, add_embeddings = False):
         try:
             q = Question(**q_dict)
             q.uuid = self.generate_uuid()
-            self.add_embedding_to_question(q)
+            if add_embeddings:
+                self.add_embedding_to_question(q)
             self._questions.append(q)
         except ValidationError as e:
             print(e.errors())
 
-    def add_questions(self, q_list: list):
+    def add_questions(self, q_list: list, add_embeddings = False):
         for q in q_list:
-            self.add_question(q)
+            self.add_question(q, add_embeddings)
 
     def add_answer_to_question(self, question_id: int, answer: str, documents=None):
         q = self.find_question(question_id)

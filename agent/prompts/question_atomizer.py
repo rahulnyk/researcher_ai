@@ -1,5 +1,5 @@
 from ..ollama import client
-from .prompt_logger import log_prompt
+from .prompt_logger import prompt_logger
 
 
 def questionAtomizer(
@@ -26,9 +26,9 @@ def questionAtomizer(
     prompt = f"Goal Question: ``` {question} ```.\n\n Your response:"
 
     if verbose:
-        log_prompt("\n---\nQuestion Atomiser Prompt\n")
-        log_prompt(f"SYS_PROMPT: {SYS_PROMPT}\n")
-        log_prompt(f"QUESTIONS: {question}\n")
+        prompt_logger.critical("\n---\nQuestion Atomiser Prompt\n")
+        prompt_logger.critical(f"SYS_PROMPT: {SYS_PROMPT}\n")
+        prompt_logger.critical(f"QUESTIONS: {question}\n")
 
     response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 

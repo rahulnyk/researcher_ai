@@ -1,5 +1,5 @@
 from ..ollama import client
-from .prompt_logger import log_prompt
+from .prompt_logger import prompt_logger
 
 def createQuestions(
     question: str,
@@ -31,11 +31,11 @@ def createQuestions(
     )
 
     if verbose:
-        log_prompt("\n---\nCreate Questions Prompt\n")
-        log_prompt(f"SYS_PROMPT: {SYS_PROMPT}\n")
-        log_prompt(f"QUESTION: {question}\n")
-        log_prompt(f"CTX: {context[:300]}\n...\n{context[-300:]}\n")
-        log_prompt(f"PREV QUESTIONS: {previous_questions}\n---\n")
+        prompt_logger.critical("\n---\nCreate Questions Prompt\n")
+        prompt_logger.critical(f"SYS_PROMPT: {SYS_PROMPT}\n")
+        prompt_logger.critical(f"QUESTION: {question}\n")
+        prompt_logger.critical(f"CTX: {context[:300]}\n...\n{context[-300:]}\n")
+        prompt_logger.critical(f"PREV QUESTIONS: {previous_questions}\n---\n")
 
     response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 

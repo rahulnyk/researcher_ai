@@ -1,6 +1,6 @@
 from ..ollama import client
 # import ollama.client as client
-from .prompt_logger import log_prompt
+from .prompt_logger import prompt_logger
 
 def mostPertinentQuestion(
     question: str,
@@ -27,10 +27,10 @@ def mostPertinentQuestion(
     )
 
     if verbose:
-        log_prompt("\n---\nMost Pertinent Question Prompt\n")
-        log_prompt(f"SYS_PROMPT: {SYS_PROMPT}\n")
-        log_prompt(f"GOAL QUESTION: {question}\n")
-        log_prompt(f"UNANSWERED QUESTIONS: {unanswered_questions}\n---\n")
+        prompt_logger.critical("\n---\nMost Pertinent Question Prompt\n")
+        prompt_logger.critical(f"SYS_PROMPT: {SYS_PROMPT}\n")
+        prompt_logger.critical(f"GOAL QUESTION: {question}\n")
+        prompt_logger.critical(f"UNANSWERED QUESTIONS: {unanswered_questions}\n---\n")
 
     response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 

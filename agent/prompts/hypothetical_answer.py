@@ -1,5 +1,5 @@
 from ..ollama import client
-from .prompt_logger import log_prompt
+from .prompt_logger import prompt_logger
 
 
 def hyDE(
@@ -25,9 +25,9 @@ def hyDE(
     prompt = f"Question: ``` {question} ```\n Your response:"
 
     if verbose:
-        log_prompt("\n---\nHypothesis Prompt\n")
-        log_prompt(f"SYS_PROMPT: {SYS_PROMPT}\n")
-        log_prompt(f"QUESTION: {question}\n---\n")
+        prompt_logger.critical("\n---\nHypothesis Prompt\n")
+        prompt_logger.critical(f"SYS_PROMPT: {SYS_PROMPT}\n")
+        prompt_logger.critical(f"QUESTION: {question}\n---\n")
 
     response, _ = client.generate(model_name=model, system=SYS_PROMPT, prompt=prompt, stream=stream)
 

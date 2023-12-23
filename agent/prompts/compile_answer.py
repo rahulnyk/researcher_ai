@@ -1,6 +1,5 @@
 from ..ollama import client
-from yachalk import chalk
-from .prompt_logger import log_prompt
+from .prompt_logger import prompt_logger
 
 def compileAnswer(
     question: str,
@@ -10,23 +9,23 @@ def compileAnswer(
     verbose=False
 ):
     SYS_PROMPT = (
-        "You will be provided with a question, and some research notes."
-        " Your task is to answer the question using the research notes."
-        " Use only the given research notes and no other pre-existing knowledge to write your answer.\n"
+        "You are a Research Assistant.\n"
+        "You will be provided with a question, and some context."
+        " Your task is to answer the question using the given context and no other previous knowledge."
+        " If the provided research notes are not relevant to the question, respond with 'Can not answer the question with given context'"
         " Use an elaborate and descriptive style, itomize whenever possible, use business casual language."
-        " If the provided research notes are not relevant to the question, respond with  'Can not answer the question with given context'"
     )
 
     prompt = (
         f"Question: ``` {question} ```\n"
-        f"Research Notes: ``` {context} ```\n"
+        f"Context: ``` {context} ```\n"
         "Your Answer:"
     )
 
     if verbose:
-        log_prompt("\n---\nCompile Answer Prompt:\n")
-        log_prompt(f"SYS_PROMPT: {SYS_PROMPT}\n")
-        log_prompt(
+        prompt_logger.critical("\n---\nCompile Answer Prompt:\n")
+        prompt_logger.critical(f"SYS_PROMPT: {SYS_PROMPT}\n")
+        prompt_logger.critical(
             f"QUESTIONS: {question} \nDOCS: {context[:500]}\n...\n{context[-500:]} \n---\n "
         )
 

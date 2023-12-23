@@ -1,10 +1,7 @@
 from ..agent_logger import AgentLogger
 from yachalk import chalk
 
-al = AgentLogger(name="PROMPT LOG")
+al = AgentLogger(name="PROMPT LOG", color='grey')
 prompt_logger = al.getLogger()
-
-def log_prompt(message: str):
-    prompt_logger.critical(chalk.gray(message))
 
 
