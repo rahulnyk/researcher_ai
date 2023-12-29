@@ -13,7 +13,7 @@ def compileAnswer(
         "You will be provided with a question, and some context."
         " Your task is to answer the question using the given context and no other previous knowledge."
         " If the provided research notes are not relevant to the question, respond with 'Can not answer the question with given context'"
-        " Use an elaborate and descriptive style, itomize whenever possible, use business casual language."
+        " Write an Elaborate and detailed answer, itomize whenever possible, use business casual language."
     )
 
     prompt = (

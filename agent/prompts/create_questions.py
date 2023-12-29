@@ -26,7 +26,7 @@ def createQuestions(
     prompt = (
         f"Goal Question: ``` {question} ```.\n\n"
         f"Context: \n ``` {context} ``` \n\n"
-        f"Previously Asked Questions:  ``` {previous_questions} ```\n\n"
+        f"No Not Ask these Previously Asked Questions Again:  ``` {previous_questions} ```\n\n"
         "Your response:"
     )
 

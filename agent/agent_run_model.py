@@ -1,7 +1,21 @@
+from dotenv import load_dotenv
+
+load_dotenv("../.env")
+import os
+
 from typing import List, Optional, Literal
 from pydantic import BaseModel, ValidationError
 from uuid import uuid4
 from openai import OpenAI
+from .models.question_node import QuestionNode
+
+from neomodel import db
+from neo4j import GraphDatabase
+
+username = os.environ["NEO4J_USERNAME"]
+password = os.environ["NEO4J_PASSWORD"]
+uri = os.environ["NEO4J_URI"]
+driver = GraphDatabase().driver(uri, auth=(username, password))
 
 
 class Question(BaseModel):
@@ -36,7 +50,7 @@ class AgentRunModel:
 
     def get_goal_question_id(self):
         return self._goal_question_id
-    
+
     def set_current_depth(self, depth: int):
         self._current_depth = depth
 
@@ -84,7 +98,7 @@ class AgentRunModel:
         qs = [q for q in self._questions if q.status == "current"]
         return None if len(qs) == 0 else qs[0]
 
-    def add_question(self, q_dict: dict, add_embeddings = False):
+    def add_question(self, q_dict: dict, add_embeddings=False):
         try:
             q = Question(**q_dict)
             q.uuid = self.generate_uuid()
@@ -94,7 +108,7 @@ class AgentRunModel:
         except ValidationError as e:
             print(e.errors())
 
-    def add_questions(self, q_list: list, add_embeddings = False):
+    def add_questions(self, q_list: list, add_embeddings=False):
         for q in q_list:
             self.add_question(q, add_embeddings)
 
@@ -111,11 +125,10 @@ class AgentRunModel:
 
     def get_answerpad(self) -> List[str]:
         return self._answerpad
-    
+
     def add_embedding_to_question(self, question: Question):
         response = self._client.embeddings.create(
-            input=question.question,
-            model="text-embedding-ada-002"
+            input=question.question, model="text-embedding-ada-002"
         )
         question.embedding = response.data[0].embedding
 
@@ -138,3 +151,28 @@ class AgentRunModel:
                 child_tree = self.create_tree(cid, id)
                 tree["children"].append(child_tree)
         return tree
+
+    def save(self):
+        q_nodes = {}
+        for q in self._questions:
+            params = (
+                q.model_dump(include={"uid", "question", "answer", "embedding"})
+                | {"run_id": self.uuid}
+                | {"goal": (q.id == 0)}
+            )
+            q_nodes[q.id] = QuestionNode(**params)
+
+        self.save_to_db(q_nodes)
+        return self.uuid
+
+    def save_to_db(self, nodes):
+        db.set_connection(driver=driver)
+        with db.transaction:
+            for q in self._questions:
+                nodes[q.id].save()
+
+            for q in self._questions:
+                if q.parent_id == None:
+                    continue
+                nodes[q.parent_id].follow_up_question.connect(nodes[q.id])
+        db.close_connection()
