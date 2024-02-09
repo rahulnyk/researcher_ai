@@ -7,3 +7,4 @@ playground
 __pycache__/
 .venv
 experiments*
+neomodel/*
